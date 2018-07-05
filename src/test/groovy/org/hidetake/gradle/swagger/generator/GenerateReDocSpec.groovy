@@ -3,14 +3,14 @@ package org.hidetake.gradle.swagger.generator
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class GenerateSwaggerUISpec extends Specification {
+class GenerateReDocSpec extends Specification {
 
-    def "GenerateSwaggerUI class should be available in a build script"() {
+    def "GenerateReDoc class should be available in a build script"() {
         when:
         def project = Fixture.projectWithPlugin()
 
         then:
-        project.GenerateSwaggerUI == GenerateSwaggerUI
+        project.GenerateReDoc == GenerateReDoc
     }
 
     def "plugin should add default task"() {
@@ -18,31 +18,22 @@ class GenerateSwaggerUISpec extends Specification {
         def project = Fixture.projectWithPlugin()
 
         then:
-        project.tasks.findByName('generateSwaggerUI')
+        project.tasks.findByName('generateReDoc')
     }
 
-    def "task should fail if swaggerUI dependency is not set"() {
-        given:
+    def "plugin should have default properties"() {
+        when:
         def project = Fixture.projectWithPlugin()
 
-        when:
-        project.tasks.generateSwaggerUI.exec()
-
         then:
-        thrown(IllegalStateException)
+        project.tasks.generateReDoc.scriptSrc =~ /\.js$/
     }
 
     @Unroll
     def 'task should #verb the output directory if wipeOutputDir == #wipe'() {
         given:
         def project = Fixture.projectWithPlugin {
-            repositories {
-                jcenter()
-            }
-            dependencies {
-                swaggerUI 'org.webjars:swagger-ui:2.2.10'
-            }
-            generateSwaggerUI {
+            generateReDoc {
                 inputFile = Fixture.file(Fixture.YAML.petstore)
                 outputDir = buildDir
                 wipeOutputDir = wipe
@@ -54,7 +45,7 @@ class GenerateSwaggerUISpec extends Specification {
         def keep = new File(project.buildDir, 'keep') << 'something'
 
         when:
-        project.tasks.generateSwaggerUI.exec()
+        project.tasks.generateReDoc.exec()
 
         then:
         keep.exists() == existence
@@ -68,20 +59,14 @@ class GenerateSwaggerUISpec extends Specification {
     def "task should fail if outputDir == projectDir"() {
         given:
         def project = Fixture.projectWithPlugin {
-            repositories {
-                jcenter()
-            }
-            dependencies {
-                swaggerUI 'org.webjars:swagger-ui:2.2.10'
-            }
-            generateSwaggerUI {
+            generateReDoc {
                 inputFile = Fixture.file(Fixture.YAML.petstore)
                 outputDir = projectDir
             }
         }
 
         when:
-        project.tasks.generateSwaggerUI.exec()
+        project.tasks.generateReDoc.exec()
 
         then:
         AssertionError e = thrown()
